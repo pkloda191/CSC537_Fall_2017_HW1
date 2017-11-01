@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends AppCompatActivity
 {
     private ViewGroup svLayout;
@@ -18,7 +20,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        //lol
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
         this.svLayout = (ViewGroup)this.findViewById(R.id.svLayout);
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity
         if(this.svLayout.getChildCount() > 0)
         {
             this.svLayout.removeViewAt(0);
+            this.numTextViews--;
+            this.theTextViews[this.numTextViews] = null;
         }
         else
         {
@@ -37,9 +40,63 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // '3' -> 3
+    private int charToInt(char c)
+    {
+        return "0123456789".indexOf(c);
+    }
+
+    //"123" -> 123
+    private int stringToInt(String s)
+    {
+        int place = 1;
+        int sum = 0;
+        for(int i = s.length()-1; i >= 0; i--)
+        {
+            sum = sum + (this.charToInt(s.charAt(i)) * place);
+            place = place * 10;
+        }
+        return sum;
+    }
+
+    private TextView findSmallest(TextView[] temp)
+    {
+        TextView winner = null;
+        int winnerPos = -1;
+
+        for(int i = 0; i < temp.length; i++)
+        {
+            if(temp[i] == null)
+            {
+                continue;
+            }
+
+            if(winner == null ||
+                    Integer.parseInt(temp[i].getText().toString()) < Integer.parseInt(winner.getText().toString()))
+            {
+                winner = this.theTextViews[i];
+                winnerPos = i;
+            }
+        }
+        temp[winnerPos] = null;
+        return winner;
+    }
+
+
     public void onSortButtonPressed(View v)
     {
-        Toast.makeText(this, "Sort the stuff and refill scrollview", Toast.LENGTH_SHORT).show();
+        TextView[] temp = new TextView[this.numTextViews];
+        for(int i = 0; i < temp.length; i++)
+        {
+            temp[i] = this.theTextViews[i];
+        }
+
+        this.svLayout.removeAllViews();
+        for(int i = 0; i < this.numTextViews; i++)
+        {
+            this.svLayout.addView(this.findSmallest(temp));
+        }
+
     }
 
     public void onAddElementButtonPressed(View v)
